@@ -1,4 +1,7 @@
-
+from __future__ import print_function
+from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
+from setuptools.command.install import install
 import os
 import shutil
 import sys
