@@ -117,7 +117,7 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'vcluster = nucleus_cli.cli:main',
+            'comet = nucleus_cli.cm:main',
         ],
     },
     cmdclass={
