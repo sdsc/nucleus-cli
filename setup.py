@@ -1,23 +1,4 @@
-#!/usr/bin/env python
-# ----------------------------------------------------------------------- #
-# Gregor von Laszewski, Indiana UNiversity, SDSC TBD
-#
-# Licensed under the Apache License, Version 2.0 (the "License"); you may #
-# not use this file except in compliance with the License. You may obtain #
-# a copy of the License at                                                #
-#                                                                         #
-# http://www.apache.org/licenses/LICENSE-2.0                              #
-#                                                                         #
-# Unless required by applicable law or agreed to in writing, software     #
-# distributed under the License is distributed on an "AS IS" BASIS,       #
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.#
-# See the License for the specific language governing permissions and     #
-# limitations under the License.                                          #
-# ------------------------------------------------------------------------#
-from __future__ import print_function
-from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
-from setuptools.command.install import install
+
 import os
 import shutil
 import sys
@@ -50,7 +31,7 @@ class UploadToPypi(install):
     description = __doc__
 
     def run(self):
-        auto_create_version("cloudmesh_client", version, filename="version.py")
+        auto_create_version("nucleus_cli", version, filename="version.py")
         os.system("make clean")
         commands = """
             python setup.py install
@@ -60,7 +41,7 @@ class UploadToPypi(install):
         os_execute(commands)    
 
 class InstallBase(install):
-    """Install the cloudmesh_client package."""
+    """Install the nucleus_cli package."""
 
     description = __doc__
 
@@ -78,8 +59,8 @@ class InstallBase(install):
                 """
         if commands:
             os_execute(commands)
-        import cloudmesh_client
-        banner("Install Cloudmesh_client {:}".format(version))
+        import nucleus_cli
+        banner("Install nucleus_cli {:}".format(version))
         install.run(self)
 
 
