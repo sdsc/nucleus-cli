@@ -1,18 +1,14 @@
 from __future__ import print_function
 
-from docopt import docopt
-from nucleus_cli.version import version
-import sys
 import requests
 from cloudmesh_base.hostlist import Parameter
-from cloudmesh_client.shell.console import Console
-from cloudmesh_client.shell.command import command
+from cloudmesh_cmd3light.command import command, Cmd3Command
 
 rest_version = "v1"
 base_url = "http://127.0.0.1:8000/" + rest_version + "/"
 
 
-class VclusterCommand(object):
+class VclusterCommand(Cmd3Command):
     topics = {"cluster": "comet"}
 
     def __init__(self, context):

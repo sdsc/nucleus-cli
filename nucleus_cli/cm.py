@@ -13,11 +13,6 @@ from docopt import docopt
 import cloudmesh_cmd3light.plugins
 import nucleus_cli.plugins
 
-#from cloudmesh_cmd3light.plugins.ManCommand import ManCommand
-#from cloudmesh_cmd3light.plugins.TerminalCommands import TerminalCommands
-#from cloudmesh_cmd3light.plugins.OpenCommand import OpenCommand
-#from cloudmesh_cmd3light.plugins.SecureShellCommand import SecureShellCommand
-
 from cloudmesh_cmd3light.version import version
 from cloudmesh_base.util import get_python
 from cloudmesh_base.util import check_python
