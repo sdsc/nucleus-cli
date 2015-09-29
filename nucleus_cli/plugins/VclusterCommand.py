@@ -8,6 +8,44 @@ rest_version = "v1"
 base_url = "http://127.0.0.1:8000/" + rest_version + "/"
 
 
+class Cluster(object):
+
+    @staticmethod
+    def list(id=None):
+
+        if id is None:
+            r = requests.get(self._url("cluster"))
+        else:
+            r = requests.get(self._url("cluster/" + id))
+        print(r.status_code)
+        print(r.text)
+
+    @staticmethod
+    def info():
+        pass
+
+    @staticmethod
+    def add():
+        pass
+
+    @staticmethod
+    def start():
+        pass
+
+    @staticmethod
+    def stop():
+        pass
+
+    @staticmethod
+    def power(clusterid, computeids=None,  on=True):
+        print("power " + on)
+        print(clusterid)
+        print(computeids)
+
+    @staticmethod
+    def delete():
+        pass
+
 class VclusterCommand(Cmd3Command):
     topics = {"cluster": "comet"}
 
@@ -25,9 +63,9 @@ class VclusterCommand(Cmd3Command):
         ::
 
            Usage:
-              vcluster info [--user=USER]
+              cluster info [--user=USER]
                             [--project=PROJECT]
-              vcluster list [--name=NAMES]
+              cluster list [--name=NAMES]
                             [--user=USER]
                             [--project=PROJECT]
                             [--hosts=HOSTS]
@@ -36,10 +74,10 @@ class VclusterCommand(Cmd3Command):
                             [--hosts=HOSTS]
                             [--format=FORMAT]
                             [ID]
-              vcluster start IDS
-              vcluster stop IDS
-              vcluster power (on|off) CLUSTERID COMPUTEIDS
-              vcluster delete [all]
+              cluster start IDS
+              cluster stop IDS
+              cluster power (on|off) CLUSTERID COMPUTEIDS
+              cluster delete [all]
                               [--user=USER]
                               [--project=PROJECT]
                               [--name=NAMES]
@@ -47,19 +85,19 @@ class VclusterCommand(Cmd3Command):
                               [--start=TIME_START]
                               [--end=TIME_END]
                               [--host=HOST]
-              vcluster delete --file=FILE
-              vcluster update [--name=NAMES]
+              cluster delete --file=FILE
+              cluster update [--name=NAMES]
                               [--hosts=HOSTS]
                               [--start=TIME_START]
                               [--end=TIME_END]
-              vcluster add [--user=USER]
+              cluster add [--user=USER]
                            [--project=PROJECT]
                            [--host=HOST]
                            [--description=DESCRIPTION]
                            [--start=TIME_START]
                            [--end=TIME_END]
                            NAME
-              vcluster add --file=FILE
+              cluster add --file=FILE
 
               Options:
                 --user=USER           user name
@@ -90,13 +128,12 @@ class VclusterCommand(Cmd3Command):
         if arguments["list"]:
 
             id = arguments["ID"]
+            Cluster.list(id)
 
-            if id is None:
-                r = requests.get(self._url("cluster"))
-            else:
-                r = requests.get(self._url("cluster/" + id))
-            print(r.status_code)
-            print(r.text)
+        elif arguments["add"]:
+
+            print ("add the cluster")
+
 
         elif arguments["start"]:
 
@@ -114,16 +151,9 @@ class VclusterCommand(Cmd3Command):
             computeids = Parameter.expand(arguments["COMPUTEIDS"])
 
             if arguments["on"]:
+                on = True
 
-                print("power on")
-
-            elif arguments["off"]:
-
-                print("power off")
-
-            print(clusterid)
-            print(computeids)
-
+            Cluster.power(clusterid, computeids, on)
 
 if __name__ == "__main__":
     main()
