@@ -36,8 +36,8 @@ class VclusterCommand(Cmd3Command):
                             [--hosts=HOSTS]
                             [--format=FORMAT]
                             [ID]
-              vcluster start ID
-              vcluster stop ID
+              vcluster start IDS
+              vcluster stop IDS
               vcluster power (on|off) CLUSTERID COMPUTEIDS
               vcluster delete [all]
                               [--user=USER]
@@ -100,13 +100,13 @@ class VclusterCommand(Cmd3Command):
 
         elif arguments["start"]:
 
-            id = arguments["ID"]
-            print("start", id)
+            ids = arguments["IDS"]
+            print("start", ids)
 
         elif arguments["stop"]:
 
-            id = arguments["ID"]
-            print("stop", id)
+            ids = arguments["IDS"]
+            print("stop", ids)
 
         elif arguments["power"]:
 
