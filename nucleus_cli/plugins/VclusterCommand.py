@@ -8,15 +8,20 @@ rest_version = "v1"
 base_url = "http://127.0.0.1:8000/" + rest_version + "/"
 
 
+def _url(endpoint):
+    return base_url + endpoint
+
 class Cluster(object):
+
+
 
     @staticmethod
     def list(id=None):
 
         if id is None:
-            r = requests.get(self._url("cluster"))
+            r = requests.get(_url("cluster"))
         else:
-            r = requests.get(self._url("cluster/" + id))
+            r = requests.get(_url("cluster/" + id))
         print(r.status_code)
         print(r.text)
 
@@ -29,12 +34,16 @@ class Cluster(object):
         pass
 
     @staticmethod
-    def start():
-        pass
+    def start(id):
+        data = {"id": id}
+        r = requests.post(_url("cluster/{id}/start".format(**data)))
+        print (r.text)
 
     @staticmethod
-    def stop():
-        pass
+    def stop(id):
+        data = {"id": id}
+        r = requests.post(_url("cluster/{id}/stop".format(**data)))
+        print (r.text)
 
     @staticmethod
     def power(clusterid, computeids=None,  on=True):
@@ -54,9 +63,6 @@ class VclusterCommand(Cmd3Command):
         if self.context.debug:
             print("init command cluster")
 
-    def _url(self, endpoint):
-        return base_url + endpoint
-
     @command
     def do_cluster(self, args, arguments):
         """
@@ -74,8 +80,8 @@ class VclusterCommand(Cmd3Command):
                             [--hosts=HOSTS]
                             [--format=FORMAT]
                             [ID]
-              cluster start IDS
-              cluster stop IDS
+              cluster start ID
+              cluster stop ID
               cluster power (on|off) CLUSTERID COMPUTEIDS
               cluster delete [all]
                               [--user=USER]
@@ -137,13 +143,16 @@ class VclusterCommand(Cmd3Command):
 
         elif arguments["start"]:
 
-            ids = arguments["IDS"]
-            print("start", ids)
+            id = arguments["ID"]
+            print("start", id)
+            Cluster.start(id)
 
         elif arguments["stop"]:
 
-            ids = arguments["IDS"]
-            print("stop", ids)
+            id = arguments["ID"]
+            print("stop", id)
+            Cluster.stop(id)
+
 
         elif arguments["power"]:
 
