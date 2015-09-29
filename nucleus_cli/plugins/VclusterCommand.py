@@ -16,7 +16,7 @@ class VclusterCommand(Cmd3Command):
         if self.context.debug:
             print("init command cluster")
 
-    def _url(endpoint):
+    def _url(self, endpoint):
         return base_url + endpoint
 
     @command
