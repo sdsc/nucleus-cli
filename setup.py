@@ -15,26 +15,23 @@ except:
     os.system("pip install git+https://github.com/cloudmesh/base.git")
 
 from cloudmesh_base.util import banner
-from cloudmesh_base.util import path_expand
-from cloudmesh_base.Shell import Shell
-from cloudmesh_base.util import auto_create_version
-from cloudmesh_base.setup import parse_requirements, os_execute, get_version_from_git
-
+from cloudmesh_base.setup import os_execute, get_version_from_git
+from nucleus_cli import __version__
 version = get_version_from_git()
 
-banner("nucleus cli {:}".format(version))
+banner("nucleus cli {:}".format(__version__))
 
-requirements = parse_requirements('requirements.txt')
+requirements = [
+    "cloudmesh_base",
+    "cloudmesh_cmd3light",
+    "docopt",]
 
-auto_create_version("nucleus_cli", version, filename="version.py")
-        
 class UploadToPypi(install):
     """Upload the package to pypi. -- only for Maintainers."""
 
     description = __doc__
 
     def run(self):
-        auto_create_version("nucleus_cli", version, filename="version.py")
         os.system("make clean")
         commands = """
             python setup.py install
@@ -108,7 +105,6 @@ setup(
         'install': InstallBase,
         'pypi': UploadToPypi,
     },
-    dependency_links =
-        ['git+https://github.com/cloudmesh/base.git']
+    dependency_links = []
 )
 

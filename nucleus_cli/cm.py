@@ -13,7 +13,8 @@ from docopt import docopt
 import cloudmesh_cmd3light.plugins
 import nucleus_cli.plugins
 
-from cloudmesh_cmd3light.version import version
+import nucleus_cli
+import cloudmesh_cmd3light
 from cloudmesh_base.util import get_python
 from cloudmesh_base.util import check_python
 import cloudmesh_base
@@ -154,9 +155,17 @@ class CloudmeshConsole(cmd.Cmd,
         python_version, pip_version = get_python()
 
         versions = {
+            "nucleus_cli": {
+                "name": "nucleus_cli",
+                "version": str(nucleus_cli.__version__)
+            },
             "cloudmesh_base": {
                 "name": "cloudmesh_base",
-                "version": str(cloudmesh_base.version)
+                "version": str(cloudmesh_base.__version__)
+            },
+            "cloudmesh_cmd3light": {
+                "name": "cloudmesh_cmd3light",
+                "version": str(cloudmesh_cmd3light.__version__)
             },
             "python": {
                 "name": "python",
