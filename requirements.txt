@@ -1,3 +1,5 @@
 cloudmesh_base
 cloudmesh_cmd3light
 docopt==0.6.2
+requests
+prettyprint
