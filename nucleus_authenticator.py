@@ -1,6 +1,11 @@
 import requests
 import json
+import time
 from pprint import pprint
+
+# for unit testing only.
+USERNAME=""
+PASSWORD=""
 
 class Authenticator(object):
     base_uri = None
@@ -59,14 +64,42 @@ class Authenticator(object):
             ret = True
         return ret
 
+# To make GET calls for synchronous or asynchronous API
+def hop_get(url, headers=None, timeout=10):
+    r = requests.get(url, headers=headers)
+    ret = None
+    # responded immediately
+    if r.status_code == 200:
+        ret = r.json()
+    # code 202, accepted call and processing
+    elif r.status_code == 202:
+        success = 0
+        ntried = 0
+        # status check by visiting another URL
+        newurl = r.headers["Location"]
+        ret = requests.get(newurl, headers=headers).json()
+        while not success and ntried<timeout:
+            # result ready, status was set to 1; otherwise 0
+            success = ret['status']
+            if success:
+                ret = ret['data']
+            else:
+                #print "trying again %s out of %s" % (ntried, timeout)
+                time.sleep(1)
+                ret = requests.get(newurl, headers=headers).json()
+                ntried += 1
+        if timeout == ntried:
+            ret = None
+    return ret
+
 def main():
     url = "http://localhost:8080/rest-auth"
     auth = Authenticator(url)
     
     # change user, password to proper value as set in django
     # in shell, we may ask user input
-    user = "USER"
-    password = "PASS"
+    user = USERNAME
+    password = PASSWORD
     print auth.status()
     print auth.logon(user, password)
     print auth.status()
@@ -90,22 +123,23 @@ def test_get_cluster_list():
     auth = Authenticator(authurl)
     # change user, password to proper value as set in django
     # in shell, we may ask user input
-    user = "USER"
-    password = "PASS"
+    user = USERNAME
+    password = PASSWORD
     token = auth.logon(user,password)
     
     # construct a header with auth token after login
     # for all the following calls before log out
     authheader = {'content-type': 'application/json', "Authorization": 'Token %s' % token}
     geturl = "http://localhost:8080/v1/cluster/"
-    r = requests.get(geturl, headers = authheader)
-    pprint (r.json())
+    r = hop_get(geturl, headers=authheader)
+    pprint (r)
     
+    # as of 2:40pm ET Oct 15, this is changed to 'not implemented'
     print "\nTEST 3: Get cluster 'OSG'"
     print "-" * 80
     geturl1 = "%s%s" % (geturl, "osg/")
-    r1 = requests.get(geturl1, headers = authheader)
-    pprint (r1.json())
+    r1 = hop_get(geturl1, headers=authheader)
+    pprint (r1)
     
     print "\nTEST 4: logoff and get cluster list again"
     print "-" * 80
@@ -117,4 +151,4 @@ def test_get_cluster_list():
     
 if __name__ == "__main__":
     test_get_cluster_list()
-        
+    #main()    
