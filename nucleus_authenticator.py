@@ -64,6 +64,7 @@ class Authenticator(object):
             ret = True
         return ret
 
+'''
 # To make GET calls for synchronous or asynchronous API
 def hop_get(url, headers=None, timeout=10):
     r = requests.get(url, headers=headers)
@@ -90,6 +91,24 @@ def hop_get(url, headers=None, timeout=10):
                 ntried += 1
         if timeout == ntried:
             ret = None
+    return ret
+'''
+
+# To make GET calls for synchronous or asynchronous API
+def hop_get(url, headers=None):
+    r = requests.get(url, headers=headers)
+    ret = None
+    # responded immediately
+    if r.status_code == 200:
+        ret = r.json()
+    # code 202, accepted call and processing
+    elif r.status_code == 202:
+        # now automatically redirect to result page
+        # thus no need to check status periodically.
+        # Currently it works well for cluster listing
+        # However not sure if the delay is large, what the behaviour would be
+        newurl = r.headers["Location"]
+        ret = requests.get(newurl, headers=headers).json()
     return ret
 
 def main():
@@ -135,6 +154,7 @@ def test_get_cluster_list():
     pprint (r)
     
     # as of 2:40pm ET Oct 15, this is changed to 'not implemented'
+    # as of 5:30pm ET this is now fixed and working
     print "\nTEST 3: Get cluster 'OSG'"
     print "-" * 80
     geturl1 = "%s%s" % (geturl, "osg/")
