@@ -98,6 +98,7 @@ def hop_get(url, headers=None, timeout=10):
 def hop_get(url, headers=None):
     r = requests.get(url, headers=headers)
     ret = None
+
     # responded immediately
     if r.status_code == 200:
         ret = r.json()
@@ -107,8 +108,20 @@ def hop_get(url, headers=None):
         # thus no need to check status periodically.
         # Currently it works well for cluster listing
         # However not sure if the delay is large, what the behaviour would be
+        finished = False
         newurl = r.headers["Location"]
-        ret = requests.get(newurl, headers=headers).json()
+        while not finished:
+            ret = requests.get(newurl, headers=headers).json()
+            # in some occasions, when the result is not ready,
+            # the result still has 'status' in it (value as '0')
+            # otherwise it's the correct value after redirection 
+            if 'status' not in ret:
+                finished = True
+            else:
+                time.sleep(1)
+    elif r.status_code == 401:
+        ret = {"error": "Not Authenticated"}
+        
     return ret
 
 def main():
