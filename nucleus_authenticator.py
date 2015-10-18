@@ -171,12 +171,18 @@ def test_get_cluster_list():
     # as of 2:40pm ET Oct 15, this is changed to 'not implemented'
     # as of 5:30pm ET this is now fixed and working
     # Getting only cluster details for those owned by the caller.
-    print "\nTEST 3: Get cluster 'OSG'"
+    print "\nTEST 3a: Get cluster 'OSG'"
     print "-" * 80
     geturl1 = "%s%s" % (geturl, "osg/")
     r1 = hop_get(geturl1, headers=authheader)
     pprint (r1)
     
+    print "\nTEST 3b: Get cluster 'vc1'"
+    print "-" * 80
+    geturl1 = "%s%s" % (geturl, "vc1/")
+    r1 = hop_get(geturl1, headers=authheader)
+    pprint (r1)
+
     print "\nTEST 4: logoff and get cluster list again"
     print "-" * 80
     auth.logoff()
