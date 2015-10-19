@@ -47,7 +47,7 @@ class Authenticator(object):
         if cls.token:
             if cls.base_uri:
                 authuri = "%s/logout/" % cls.base_uri
-                header = cls.HEADER
+                header = dict(cls.HEADER)
                 header['Authorization'] = "Token %s" % cls.token
                 r = requests.post(authuri,
                                   headers = header,
@@ -95,13 +95,20 @@ def hop_get(url, headers=None, timeout=10):
 '''
 
 # To make GET calls for synchronous or asynchronous API
-def hop_get(url, headers=None):
-    r = requests.get(url, headers=headers)
+def hop_http(url, action="get", headers=None, data=None):
+    if 'post' == action:
+        r = requests.post(url, headers=headers, data=json.dumps(data))
+    else:
+        r = requests.get(url, headers=headers)
+
     ret = None
 
     # responded immediately
     if r.status_code == 200:
-        ret = r.json()
+        try:
+            ret = r.json()
+        except:
+            ret = r
     # code 202, accepted call and processing
     elif r.status_code == 202:
         # now automatically redirect to result page
@@ -111,7 +118,11 @@ def hop_get(url, headers=None):
         finished = False
         newurl = r.headers["Location"]
         while not finished:
-            ret = requests.get(newurl, headers=headers).json()
+            ret = requests.get(newurl, headers=headers)
+            try:
+                ret = ret.json()
+            except:
+                pass
             # in some occasions, when the result is not ready,
             # the result still has 'status' in it (value as '0')
             # otherwise it's the correct value after redirection 
@@ -165,7 +176,7 @@ def test_get_cluster_list():
     # for all the following calls before log out
     authheader = {'content-type': 'application/json', "Authorization": 'Token %s' % token}
     geturl = "http://localhost:8080/v1/cluster/"
-    r = hop_get(geturl, headers=authheader)
+    r = hop_http(geturl, headers=authheader)
     pprint (r)
     
     # as of 2:40pm ET Oct 15, this is changed to 'not implemented'
@@ -174,13 +185,13 @@ def test_get_cluster_list():
     print "\nTEST 3a: Get cluster 'OSG'"
     print "-" * 80
     geturl1 = "%s%s" % (geturl, "osg/")
-    r1 = hop_get(geturl1, headers=authheader)
+    r1 = hop_http(geturl1, headers=authheader)
     pprint (r1)
     
     print "\nTEST 3b: Get cluster 'vc1'"
     print "-" * 80
     geturl1 = "%s%s" % (geturl, "vc1/")
-    r1 = hop_get(geturl1, headers=authheader)
+    r1 = hop_http(geturl1, headers=authheader)
     pprint (r1)
 
     print "\nTEST 4: logoff and get cluster list again"
@@ -190,7 +201,36 @@ def test_get_cluster_list():
     geturl = "http://localhost:8080/v1/cluster/"
     r = requests.get(geturl, headers = authheader)
     pprint (r.json())
+
+def test_power_on_nodes():
     
+    print "\nTEST: power on a list of nodes"
+    print "-" * 80
+
+    print "\nAuthenticating...\n"
+    # always logon first
+    authurl = "http://localhost:8080/rest-auth"
+    auth = Authenticator(authurl)
+    user = USERNAME
+    password = PASSWORD
+    token = auth.logon(user,password)
+    authheader = {'content-type': 'application/json', "Authorization": 'Token %s' % token}
+
+    url = "http://localhost:8080/v1/cluster/"
+    vcname = "vc2"
+    vmnames = ["vm-vc2-0", "vm-vc2-1"]
+    vmhosts = {}
+    vmhosts[vmnames[0]] = "comet-01-05"
+    vmhosts[vmnames[1]] = "comet-01-06"
+    data = [{"node":vm,"host":vmhosts[vm]} for vm in vmnames]
+
+    print "Issuing request to poweron nodes..."
+    posturl = "%s%s/compute/poweron" % (url, vcname)
+    r = hop_http(posturl, action="post", headers=authheader, data=data)
+    print "RETURNED RESULTS:"
+    print (r)
+
 if __name__ == "__main__":
     test_get_cluster_list()
-    #main()    
+    #main()
+    test_power_on_nodes()
