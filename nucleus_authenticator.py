@@ -134,7 +134,7 @@ def hop_http(url, action="get", headers=None, data=None):
         ret = {"error": "Not Authenticated"}
     elif r.status_code == 403:
         ret = {"error": "Permission denied"}
-        
+
     return ret
 
 def main():
@@ -216,16 +216,17 @@ def test_power_on_nodes():
     token = auth.logon(user,password)
     authheader = {'content-type': 'application/json', "Authorization": 'Token %s' % token}
 
-    url = "http://localhost:8080/v1/cluster/"
+    url = "http://localhost:8080/v1/"
     vcname = "vc2"
     vmnames = ["vm-vc2-0", "vm-vc2-1"]
     vmhosts = {}
-    vmhosts[vmnames[0]] = "comet-01-05"
-    vmhosts[vmnames[1]] = "comet-01-06"
-    data = [{"node":vm,"host":vmhosts[vm]} for vm in vmnames]
+    vmhosts[vmnames[0]] = "comet-01-05aaa"
+    vmhosts[vmnames[1]] = "comet-01-06bbb"
+    data = {"computes":[{"name":vm,"host":vmhosts[vm]} for vm in vmnames],"cluster":"%s" % vcname}
 
     print "Issuing request to poweron nodes..."
-    posturl = "%s%s/compute/poweron" % (url, vcname)
+    posturl = "%s/computeset/" % (url)
+    #posturl = "%s%s/compute/poweron" % (url, vcname)
     r = hop_http(posturl, action="post", headers=authheader, data=data)
     print "RETURNED RESULTS:"
     print (r)
