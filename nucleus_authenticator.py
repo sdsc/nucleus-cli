@@ -6,6 +6,7 @@ from pprint import pprint
 # for unit testing only.
 USERNAME=""
 PASSWORD=""
+requests.packages.urllib3.disable_warnings()
 
 class Authenticator(object):
     base_uri = None
@@ -98,6 +99,8 @@ def hop_get(url, headers=None, timeout=10):
 def hop_http(url, action="get", headers=None, data=None, cacert=False):
     if 'post' == action:
         r = requests.post(url, headers=headers, data=json.dumps(data), verify=cacert)
+    elif 'put' == action:
+        r = requests.put(url, headers=headers, verify=cacert)
     else:
         r = requests.get(url, headers=headers, verify=cacert)
 
@@ -134,6 +137,8 @@ def hop_http(url, action="get", headers=None, data=None, cacert=False):
         ret = {"error": "Not Authenticated"}
     elif r.status_code == 403:
         ret = {"error": "Permission denied"}
+    elif r.status_code == 400:
+        ret = {"error": "%s" % r.text}
 
     return ret
 
@@ -176,8 +181,9 @@ def test_get_cluster_list():
     # construct a header with auth token after login
     # for all the following calls before log out
     authheader = {'content-type': 'application/json', "Authorization": 'Token %s' % token}
-    geturl = "https://localhost:8443/nucleus/v1/cluster/"
-    r = hop_http(geturl, headers=authheader)
+    geturl = "https://localhost:8443/nucleus/v1/"
+    geturl1 = "%scluster/" % (geturl)
+    r = hop_http(geturl1, headers=authheader)
     pprint (r)
     
     # as of 2:40pm ET Oct 15, this is changed to 'not implemented'
@@ -185,17 +191,30 @@ def test_get_cluster_list():
     # Getting only cluster details for those owned by the caller.
     print "\nTEST 3a: Get cluster 'OSG'"
     print "-" * 80
-    geturl1 = "%s%s" % (geturl, "osg/")
+    geturl1 = "%scluster/%s" % (geturl, "osg/")
     r1 = hop_http(geturl1, headers=authheader)
     pprint (r1)
     
-    print "\nTEST 3b: Get cluster 'vc1'"
+    print "\nTEST 3b: Get cluster 'vc2'"
     print "-" * 80
-    geturl1 = "%s%s" % (geturl, "vc1/")
+    geturl1 = "%scluster/%s" % (geturl, "vc2/")
     r1 = hop_http(geturl1, headers=authheader)
     pprint (r1)
 
-    print "\nTEST 4: logoff and get cluster list again"
+    print "\nTEST 4: Get compute nodes sets"
+    print "-" * 80
+    geturl1 = "%scomputeset/" % (geturl)
+    print geturl1
+    r1 = hop_http(geturl1, headers=authheader)
+    pprint (r1)
+
+    print "\nTEST 4a: Get compute nodes set with id"
+    print "-" * 80
+    geturl1 = "%scomputeset/%s/" % (geturl, 32)
+    r1 = hop_http(geturl1, headers=authheader)
+    pprint (r1)
+
+    print "\nTEST 10: logoff and get cluster list again"
     print "-" * 80
     auth.logoff()
     authheader = {'content-type': 'application/json', "Authorization": 'Token %s' % token}
@@ -203,9 +222,9 @@ def test_get_cluster_list():
     r = requests.get(geturl, headers = authheader, verify=False)
     pprint (r.json())
 
-def test_power_on_nodes():
+def test_power_nodes(action='on'):
     
-    print "\nTEST: power on a list of nodes"
+    print "\nTEST: power on/off a list of nodes"
     print "-" * 80
 
     print "\nAuthenticating...\n"
@@ -225,14 +244,26 @@ def test_power_on_nodes():
     vmhosts[vmnames[1]] = "comet-01-06bbb"
     data = {"computes":[{"name":vm,"host":vmhosts[vm]} for vm in vmnames],"cluster":"%s" % vcname}
 
-    print "Issuing request to poweron nodes..."
-    posturl = "%s/computeset/" % (url)
-    #posturl = "%s%s/compute/poweron" % (url, vcname)
-    r = hop_http(posturl, action="post", headers=authheader, data=data)
-    print "RETURNED RESULTS:"
-    print (r)
+    if 'on' == action:
+        print "Issuing request to poweron nodes..."
+        posturl = "%s/computeset/" % (url)
+        #posturl = "%s%s/compute/poweron" % (url, vcname)
+        r = hop_http(posturl, action="post", headers=authheader, data=data)
+        print "RETURNED RESULTS:"
+        print (r)
+    elif 'off' == action:
+        computesetid = 33
+        print "Issuing request to poweroff nodes..."
+        posturl = "%s/computeset/%s/poweroff" % (url, computesetid)
+        #posturl = "%s%s/compute/poweron" % (url, vcname)
+        r = hop_http(posturl, action="put", headers=authheader)
+        print "RETURNED RESULTS:"
+        print (r)
+    else:
+        print "NOT Supported!"
 
 if __name__ == "__main__":
     test_get_cluster_list()
     #main()
-    test_power_on_nodes()
+    test_power_nodes("off")
+    test_power_nodes()
