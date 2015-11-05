@@ -95,11 +95,11 @@ def hop_get(url, headers=None, timeout=10):
 '''
 
 # To make GET calls for synchronous or asynchronous API
-def hop_http(url, action="get", headers=None, data=None):
+def hop_http(url, action="get", headers=None, data=None, cacert=False):
     if 'post' == action:
-        r = requests.post(url, headers=headers, data=json.dumps(data))
+        r = requests.post(url, headers=headers, data=json.dumps(data), verify=cacert)
     else:
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=headers, verify=cacert)
 
     ret = None
 
@@ -118,7 +118,7 @@ def hop_http(url, action="get", headers=None, data=None):
         finished = False
         newurl = r.headers["Location"]
         while not finished:
-            ret = requests.get(newurl, headers=headers)
+            ret = requests.get(newurl, headers=headers, verify=cacert)
             try:
                 ret = ret.json()
             except:
@@ -158,13 +158,14 @@ def test_get_cluster_list():
     print "\nTEST 1: Get without logon"
     print "-" * 80
     authheader = {'content-type': 'application/json', "Authorization": 'Token %s' % token}
-    geturl = "http://localhost:8080/v1/cluster/"
-    r = requests.get(geturl, headers = authheader)
+    geturl = "https://localhost:8443/nucleus/v1/cluster/"
+    r = requests.get(geturl, headers = authheader, verify=False)
+    #pprint (r)
     pprint (r.json())
     
     print "\nTEST 2: Auth and then get cluster list"
     print "-" * 80
-    authurl = "http://localhost:8080/rest-auth"
+    authurl = "https://localhost:8443/nucleus/rest-auth"
     auth = Authenticator(authurl)
     # change user, password to proper value as set in django
     # in shell, we may ask user input
@@ -175,7 +176,7 @@ def test_get_cluster_list():
     # construct a header with auth token after login
     # for all the following calls before log out
     authheader = {'content-type': 'application/json', "Authorization": 'Token %s' % token}
-    geturl = "http://localhost:8080/v1/cluster/"
+    geturl = "https://localhost:8443/nucleus/v1/cluster/"
     r = hop_http(geturl, headers=authheader)
     pprint (r)
     
@@ -198,8 +199,8 @@ def test_get_cluster_list():
     print "-" * 80
     auth.logoff()
     authheader = {'content-type': 'application/json', "Authorization": 'Token %s' % token}
-    geturl = "http://localhost:8080/v1/cluster/"
-    r = requests.get(geturl, headers = authheader)
+    geturl = "https://localhost:8443/nucleus/v1/cluster/"
+    r = requests.get(geturl, headers = authheader, verify=False)
     pprint (r.json())
 
 def test_power_on_nodes():
@@ -209,14 +210,14 @@ def test_power_on_nodes():
 
     print "\nAuthenticating...\n"
     # always logon first
-    authurl = "http://localhost:8080/rest-auth"
+    authurl = "https://localhost:8443/nucleus/rest-auth"
     auth = Authenticator(authurl)
     user = USERNAME
     password = PASSWORD
     token = auth.logon(user,password)
     authheader = {'content-type': 'application/json', "Authorization": 'Token %s' % token}
 
-    url = "http://localhost:8080/v1/"
+    url = "https://localhost:8443/nucleus/v1/"
     vcname = "vc2"
     vmnames = ["vm-vc2-0", "vm-vc2-1"]
     vmhosts = {}
